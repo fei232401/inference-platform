@@ -1,0 +1,6 @@
+FROM inference-platform/router:load-control-v1
+ARG GIT_SHA=closure-v1
+ENV APP_VERSION=${GIT_SHA}
+LABEL org.opencontainers.image.revision=${GIT_SHA}
+COPY services/router/src /app/src
+COPY ops /app/ops

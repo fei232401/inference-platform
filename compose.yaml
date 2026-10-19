@@ -1,0 +1,108 @@
+name: inference-platform
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: inference_platform
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:55433:5432"
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U app -d inference_platform"]
+      interval: 3s
+      retries: 20
+  api:
+    image: ${IMAGE_PREFIX:-inference-platform}/api:${IMAGE_TAG:-local}
+    build: services/api
+    environment:
+      DATABASE_DSN: postgresql+asyncpg://app:${POSTGRES_PASSWORD}@postgres:5432/inference_platform
+      AUTH_REQUIRED: "true"
+      BACKEND_HEALTH_TTL_SECONDS: "60"
+      SECRET_PEPPER: ${SECRET_PEPPER:?set SECRET_PEPPER in .env}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=3)"]
+      interval: 5s
+      retries: 12
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:18000:8000"
+  router:
+    image: ${IMAGE_PREFIX:-inference-platform}/router:${IMAGE_TAG:-local}
+    build:
+      context: .
+      dockerfile: services/router/Dockerfile
+    environment:
+      CONTROL_PLANE_URL: http://api:8000
+      REQUEST_TIMEOUT_SECONDS: ${REQUEST_TIMEOUT_SECONDS:-30}
+      CONTROL_TIMEOUT_SECONDS: ${CONTROL_TIMEOUT_SECONDS:-3}
+      UPSTREAM_TIMEOUT_SECONDS: ${UPSTREAM_TIMEOUT_SECONDS:-25}
+      AUDIT_TIMEOUT_SECONDS: ${AUDIT_TIMEOUT_SECONDS:-2}
+      BACKEND_MAX_INFLIGHT: ${BACKEND_MAX_INFLIGHT:-4}
+      BACKEND_INFLIGHT_LIMITS: '${BACKEND_INFLIGHT_LIMITS:-{}}'
+      STREAM_OPENAI: "true"
+      TTFT_MODEL: ${TTFT_MODEL:-/models/qwen2.5-3b-awq}
+      TTFT_WINDOW_SECONDS: "30"
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=3)"]
+      interval: 5s
+      retries: 12
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:18001:8000"
+  web:
+    image: ${IMAGE_PREFIX:-inference-platform}/web:${IMAGE_TAG:-local}
+    build: web
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1/readyz]
+      interval: 5s
+      retries: 12
+    depends_on:
+      api:
+        condition: service_healthy
+      router:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:18080:80"
+  monitor:
+    image: ${IMAGE_PREFIX:-inference-platform}/router:${IMAGE_TAG:-local}
+    command: [python, -m, ops.health]
+    environment:
+      CONTROL_PLANE_URL: http://api:8000
+      ADMIN_KEY_FILE: /run/secrets/admin-key
+      PROBE_STATE_DIR: /state
+      PROBE_INTERVAL_SECONDS: "15"
+    volumes:
+      - ./.state/admin-key:/run/secrets/admin-key:ro
+      - ./.state/probes:/state
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, python, -c, "from pathlib import Path; import time; assert time.time() - float(Path('/state/heartbeat').read_text()) < 60"]
+      interval: 10s
+      retries: 6
+  init:
+    profiles: [tools]
+    image: ${IMAGE_PREFIX:-inference-platform}/api:${IMAGE_TAG:-local}
+    build: services/api
+    working_dir: /workspace
+    command: [python, scripts/bootstrap.py]
+    environment:
+      DATABASE_DSN: postgresql+asyncpg://app:${POSTGRES_PASSWORD}@postgres:5432/inference_platform
+      SECRET_PEPPER: ${SECRET_PEPPER}
+    volumes:
+      - ./:/workspace:ro
+      - ./.state:/workspace/.state
+    depends_on:
+      postgres:
+        condition: service_healthy
+volumes:
+  postgres-data:

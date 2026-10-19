@@ -1,0 +1,76 @@
+{
+  "spec": {
+    "template": {
+      "metadata": {
+        "annotations": {
+          "fei.local/kv-offload-variant": "wsl-dma-compat"
+        }
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "fei-offload-shm",
+            "emptyDir": {
+              "medium": "Memory",
+              "sizeLimit": "1Gi"
+            }
+          },
+          {
+            "name": "fei-offload-compat",
+            "configMap": {
+              "name": "fei-wsl-offload-compat"
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "vllm",
+            "image": "docker.io/vllm/vllm-openai@sha256:0a51ea5b4ae2dc5d81890e5173f54203d2a3ae0cfffe51b8fd2afd4391bfd967",
+            "imagePullPolicy": "IfNotPresent",
+            "args": [
+              "--model",
+              "/models/qwen2.5-3b-awq",
+              "--gpu-memory-utilization",
+              "0.8",
+              "--max-model-len",
+              "5000",
+              "--enforce-eager",
+              "--max-num-seqs",
+              "16",
+              "--kv-transfer-config",
+              "{\"kv_connector\": \"OffloadingConnector\", \"kv_role\": \"kv_both\", \"kv_connector_extra_config\": {\"cpu_bytes_to_use\": 536870912, \"block_size\": 64}}",
+              "--kv-cache-memory-bytes",
+              "268435456",
+              "--attention-backend",
+              "FLASHINFER",
+              "--no-async-scheduling",
+              "--worker-extension-cls",
+              "wsl_offload_compat.WorkerExtension"
+            ],
+            "env": [
+              {
+                "name": "VLLM_USE_V2_MODEL_RUNNER",
+                "value": "0"
+              },
+              {
+                "name": "PYTHONPATH",
+                "value": "/compat"
+              }
+            ],
+            "volumeMounts": [
+              {
+                "name": "fei-offload-shm",
+                "mountPath": "/dev/shm"
+              },
+              {
+                "name": "fei-offload-compat",
+                "mountPath": "/compat",
+                "readOnly": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

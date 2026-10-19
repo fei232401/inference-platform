@@ -1,0 +1,34 @@
+[
+  {
+    "component": "api",
+    "source": "/mnt/d/projects/platform/ai-infra-platform-api",
+    "commit": "a737d418ef915f1163e9f5818bc12e2f435c58c4",
+    "dirty": [
+      " M README.md",
+      " M openapi.json"
+    ]
+  },
+  {
+    "component": "router",
+    "source": "/mnt/d/projects/platform/ai-infra-platform-router",
+    "commit": "f189ee18d9a88a15f99cb1c184b56896537a5a90",
+    "dirty": []
+  },
+  {
+    "component": "web",
+    "source": "/mnt/d/projects/platform/ai-infra-platform-web",
+    "commit": "1e85e4a2aa42bed5a5b3b40361dbc58148bc2be4",
+    "dirty": [
+      " M README.md",
+      " M openapi.json"
+    ]
+  },
+  {
+    "component": "db",
+    "source": "/mnt/d/projects/platform/ai-infra-platform-db",
+    "commit": "f3e7f4e74928c183fc2ffa89acab2e6fa80cec71",
+    "dirty": [
+      " M README.md"
+    ]
+  }
+]
