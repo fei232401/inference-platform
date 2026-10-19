@@ -35,6 +35,8 @@ class Downstream:
         self.entered = asyncio.Event()
         self.audit_entered = asyncio.Event()
         self.control_keys = []
+        self.control_paths = []
+        self.control_failure = None
         self.stream = None
 
     async def __call__(self, request):
@@ -53,6 +55,11 @@ class Downstream:
             self.records.append(json.loads(request.content))
             return httpx.Response(self.audit_status, json={"request_id": "saved"})
         await asyncio.sleep(self.control_delay)
+        self.control_paths.append(path)
+        if self.control_failure == "down":
+            raise httpx.ConnectError("control plane offline", request=request)
+        if self.control_failure is not None:
+            return httpx.Response(self.control_failure, json={"detail": "control plane failure"})
         if path.endswith("/candidates"):
             return httpx.Response(200, json={"ranked": [{"backend_id": 1, "score": 1, "excluded": False}]})
         return httpx.Response(200, json={"id": 1, "name": "engine", "url": "http://engine", "engine": "openai"})
@@ -198,5 +205,54 @@ async def test_lifespan_reuses_and_closes_connection_pools(monkeypatch):
     {"request_timeout_seconds": 1, "audit_timeout_seconds": 1},
 ])
 def test_invalid_budgets(values):
+    with pytest.raises(ValidationError):
+        Settings(**values)
+
+
+@pytest.mark.anyio
+async def test_control_lookups_are_cached_per_key(environment):
+    await route("first")
+    await route("first")
+    assert environment.control_paths.count("/api/v1/routing/candidates") == 1
+    result = await route("second")
+    assert environment.control_paths.count("/api/v1/routing/candidates") == 2
+    assert result.decision["control_sources"] == {"candidates": "fresh", "backend": "fresh"}
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("failure", ["down", 503])
+async def test_unavailable_control_plane_uses_stale_snapshot(environment, monkeypatch, failure):
+    monkeypatch.setattr(main, "get_settings", lambda: settings(control_cache_seconds=0.0001, control_stale_seconds=30))
+    await route()
+    await asyncio.sleep(.001)
+    environment.control_failure = failure
+    result = await route()
+    assert result.output == "OK"
+    assert result.decision["fallback_reason"] == "control_plane_stale_snapshot"
+    assert result.decision["control_sources"] == {"candidates": "stale", "backend": "stale"}
+
+
+@pytest.mark.anyio
+async def test_rejected_key_is_not_served_from_stale_snapshot(environment, monkeypatch):
+    monkeypatch.setattr(main, "get_settings", lambda: settings(control_cache_seconds=0.0001, control_stale_seconds=30))
+    await route()
+    await asyncio.sleep(.001)
+    environment.control_failure = 401
+    with pytest.raises(HTTPException) as caught:
+        await route()
+    assert caught.value.status_code == 401
+    assert len(main.app.state.control_cache) == 0
+
+
+@pytest.mark.anyio
+async def test_control_plane_down_without_snapshot_fails(environment):
+    environment.control_failure = "down"
+    with pytest.raises(httpx.ConnectError):
+        await route()
+    assert not environment.entered.is_set()
+
+
+@pytest.mark.parametrize("values", [{"control_cache_seconds": -1}, {"control_cache_seconds": 5, "control_stale_seconds": 1}])
+def test_invalid_cache_windows(values):
     with pytest.raises(ValidationError):
         Settings(**values)

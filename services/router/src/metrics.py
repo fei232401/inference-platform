@@ -39,6 +39,12 @@ CANDIDATES = Histogram(
     buckets=(0, 1, 2, 3, 5, 10),
 )
 
+CONTROL_LOOKUPS = Counter(
+    "router_control_lookups_total",
+    "Control-plane lookups by kind and source: fresh, cached or stale fallback",
+    ["kind", "source"],
+)
+
 RECORD_FAILURES = Counter(
     "router_record_failures_total",
     "把请求与决策写回控制层失败的次数",

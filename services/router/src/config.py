@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     upstream_timeout_seconds: float = Field(default=180.0, gt=0, allow_inf_nan=False)
     control_timeout_seconds: float = Field(default=3.0, gt=0, allow_inf_nan=False)
     audit_timeout_seconds: float = Field(default=2.0, gt=0, allow_inf_nan=False)
+    control_cache_seconds: float = Field(default=2.0, ge=0, allow_inf_nan=False)
+    control_stale_seconds: float = Field(default=30.0, ge=0, allow_inf_nan=False)
     default_policy: str = "weighted_random"
     default_max_tokens: int = 128
     backend_max_inflight: int = Field(default=4, ge=1)
@@ -24,6 +26,8 @@ class Settings(BaseSettings):
     def validate_budgets(self):
         if self.audit_timeout_seconds >= self.request_timeout_seconds:
             raise ValueError("audit_timeout_seconds must be smaller than request_timeout_seconds")
+        if self.control_stale_seconds < self.control_cache_seconds:
+            raise ValueError("control_stale_seconds must not be smaller than control_cache_seconds")
         return self
 
     @field_validator("backend_inflight_limits")

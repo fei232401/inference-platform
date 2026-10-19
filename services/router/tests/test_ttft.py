@@ -72,3 +72,17 @@ async def test_stream_http_failure_keeps_readable_error_body(monkeypatch):
         with pytest.raises(httpx.HTTPStatusError) as caught:
             await main._call_backend(client, "openai", "http://engine", "model", "hi", 1)
         assert caught.value.response.text == "busy"
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("query,expected", [("", "default"), ("?model=other", "other")])
+async def test_ttft_endpoint_selects_requested_model(monkeypatch, query, expected):
+    monkeypatch.setattr(main, "get_settings", lambda: SimpleNamespace(ttft_model="default", ttft_window_seconds=30))
+    window = TTFTWindow()
+    window.observe("default", 10)
+    window.observe("other", 20)
+    monkeypatch.setattr(main.app.state, "ttft", window)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=main.app), base_url="http://router") as client:
+        response = await client.get("/ttft_p95" + query)
+    assert response.status_code == 200
+    assert response.json()["model"] == expected

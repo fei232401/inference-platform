@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import asyncio
+import hashlib
 import json
 import time
 from contextlib import asynccontextmanager
@@ -9,14 +10,15 @@ from datetime import datetime, timezone
 from typing import Any
 
 import httpx
-from fastapi import FastAPI, Header, HTTPException, Response, Request
+from fastapi import FastAPI, Header, HTTPException, Query, Response, Request
 from fastapi.responses import JSONResponse
 from prometheus_client import make_asgi_app
 from pydantic import BaseModel, Field
 
 from .admission import AdmissionController, AdmissionRejected
 from .config import get_settings
-from .metrics import ADMISSION_REJECTIONS, UPSTREAM_TTFT, observe_record_failure, observe_route, observe_upstream_error
+from .control_cache import ControlCache, ControlPlaneUnavailable
+from .metrics import ADMISSION_REJECTIONS, CONTROL_LOOKUPS, UPSTREAM_TTFT, observe_record_failure, observe_route, observe_upstream_error
 from .picking import POLICIES, normalize
 from .ttft import TTFTWindow
 
@@ -45,6 +47,7 @@ app.mount("/metrics", make_asgi_app())
 app.state.admission = AdmissionController()
 app.state.ttft = TTFTWindow()
 app.state.audit_tasks = set()
+app.state.control_cache = ControlCache()
 
 
 @asynccontextmanager
@@ -86,6 +89,46 @@ async def _finish_audit(task):
             if task.cancelled():
                 raise
             cancellation = exc
+
+
+def _control_unavailable(exc: BaseException) -> bool:
+    if isinstance(exc, httpx.RequestError):
+        return True
+    if isinstance(exc, HTTPException) and isinstance(exc.detail, dict):
+        code = exc.detail.get("code")
+        status = (exc.detail.get("detail") or {}).get("status", 0)
+        return code == "control_plane_timeout" or code == "control_plane_error" and status >= 500
+    return False
+
+
+def _key_digest(api_key: str) -> str:
+    return hashlib.sha256(api_key.encode()).hexdigest()
+
+
+async def _cached_control(kind: str, key: tuple, loader, settings) -> tuple[Any, str]:
+    cache = app.state.control_cache
+
+    async def load():
+        try:
+            return await _control_call(loader(), settings.control_timeout_seconds)
+        except HTTPException as exc:
+            if exc.status_code == 401:
+                cache.evict(lambda cached: cached[1] == key[0])
+            if _control_unavailable(exc):
+                raise ControlPlaneUnavailable(exc) from exc
+            raise
+        except httpx.RequestError as exc:
+            raise ControlPlaneUnavailable(exc) from exc
+
+    try:
+        value, source = await cache.get(
+            (kind, *key), load, settings.control_cache_seconds, settings.control_stale_seconds,
+        )
+    except ControlPlaneUnavailable as exc:
+        CONTROL_LOOKUPS.labels(kind=kind, source="unavailable").inc()
+        raise exc.original
+    CONTROL_LOOKUPS.labels(kind=kind, source=source).inc()
+    return value, source
 
 
 @app.exception_handler(httpx.RequestError)
@@ -258,11 +301,12 @@ async def healthz() -> dict[str, str]:
 
 
 @app.get("/ttft_p95")
-async def ttft_p95(response: Response):
+async def ttft_p95(response: Response, model: str | None = Query(default=None, min_length=1, max_length=200)):
     settings = get_settings()
-    if not settings.ttft_model:
-        raise HTTPException(status_code=503, detail="TTFT_MODEL is not configured")
-    result = app.state.ttft.snapshot(settings.ttft_model, settings.ttft_window_seconds)
+    model = model or settings.ttft_model
+    if not model:
+        raise HTTPException(status_code=503, detail="TTFT_MODEL is not configured and no model was requested")
+    result = app.state.ttft.snapshot(model, settings.ttft_window_seconds)
     response.headers["Cache-Control"] = "no-store"
     if not result["sample_count"]:
         response.status_code = 503
@@ -316,6 +360,8 @@ async def route(
 
     base = normalize(settings.control_plane_url)
     headers = {"X-API-Key": x_api_key}
+    key_digest = _key_digest(x_api_key)
+    control_sources = {}
     max_tokens = payload.max_tokens or settings.default_max_tokens
     started = datetime.now(timezone.utc)
     clock = time.perf_counter()
@@ -328,18 +374,18 @@ async def route(
     async with _http_client("http_client") as client, _http_client("audit_client") as audit_client:
         try:
             async with asyncio.timeout(settings.request_timeout_seconds - settings.audit_timeout_seconds):
-                candidates = await _control_call(
-                    _fetch_candidates(client, base, headers, payload.model_name, policy),
-                    settings.control_timeout_seconds,
+                candidates, control_sources["candidates"] = await _cached_control(
+                    "candidates", (key_digest, payload.model_name, policy),
+                    lambda: _fetch_candidates(client, base, headers, payload.model_name, policy), settings,
                 )
                 with app.state.admission.reserve(
                     candidates, policy, settings.backend_max_inflight, settings.backend_inflight_limits,
                 ) as reservation:
                     chosen = reservation.chosen
                     candidates = reservation.ranked
-                    backend = await _control_call(
-                        _fetch_backend(client, base, headers, int(chosen["backend_id"])),
-                        settings.control_timeout_seconds,
+                    backend, control_sources["backend"] = await _cached_control(
+                        "backend", (key_digest, int(chosen["backend_id"])),
+                        lambda: _fetch_backend(client, base, headers, int(chosen["backend_id"])), settings,
                     )
                     engine_model = payload.engine_models.get(str(backend["name"])) or payload.model_name
                     try:
@@ -400,7 +446,8 @@ async def route(
                     "selected_limit": chosen["max_inflight"],
                 },
             },
-            "fallback_reason": None,
+            "fallback_reason": "control_plane_stale_snapshot" if "stale" in control_sources.values() else None,
+            "control_sources": control_sources,
         }
         audit_started = time.perf_counter()
         task = asyncio.create_task(_audit(audit_client, base, headers, {
