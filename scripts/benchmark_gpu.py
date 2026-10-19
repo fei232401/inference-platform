@@ -140,8 +140,8 @@ def main() -> None:
     parser.add_argument("--prompt", default="Explain how a Kubernetes controller reconciles desired state and actual state, including retries and readiness. Give a detailed answer.")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
-    if not 1 <= args.requests <= 256 or not 1 <= args.tokens <= 512 or not all(1 <= c <= 16 for c in args.concurrency) or args.warmup < 0:
-        parser.error("requests 1..256, tokens 1..512, concurrency 1..16, warmup >= 0 required")
+    if not 1 <= args.requests <= 256 or not 1 <= args.tokens <= 512 or not all(1 <= c <= 64 for c in args.concurrency) or args.warmup < 0:
+        parser.error("requests 1..256, tokens 1..512, concurrency 1..64, warmup >= 0 required")
     if args.mode == "router" and not args.key_file:
         parser.error("router mode requires --key-file")
     asyncio.run(run(args))

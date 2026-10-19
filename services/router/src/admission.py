@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from threading import Lock
 from typing import Any
 
+from .affinity import bounded_choice
 from .metrics import BACKEND_INFLIGHT
 from .picking import pick
 
@@ -22,6 +23,7 @@ class AdmissionRejected(Exception):
 class Reservation:
     chosen: dict[str, Any]
     ranked: list[dict[str, Any]]
+    affinity: dict[str, Any] | None = None
 
 
 class AdmissionController:
@@ -36,6 +38,8 @@ class AdmissionController:
         policy: str,
         default_limit: int,
         limits: dict[str, int],
+        affinity_key: str | None = None,
+        load_factor: float = 1.25,
     ) -> Iterator[Reservation]:
         with self._lock:
             snapshot = []
@@ -57,7 +61,12 @@ class AdmissionController:
             eligible = [item for item in snapshot if not item["excluded"]]
             if not eligible:
                 raise AdmissionRejected("backend_capacity_exhausted" if healthy else "no_candidate", snapshot)
-            if policy == "least_inflight":
+            affinity = None
+            if policy == "prefix_affinity":
+                if affinity_key is None:
+                    raise ValueError("prefix_affinity requires an affinity key")
+                chosen, affinity = bounded_choice(affinity_key, eligible, load_factor)
+            elif policy == "least_inflight":
                 minimum = min(item["inflight"] for item in eligible)
                 chosen = random.choice([item for item in eligible if item["inflight"] == minimum])
             else:
@@ -68,7 +77,7 @@ class AdmissionController:
             self._inflight[backend_id] = self._inflight.get(backend_id, 0) + 1
             BACKEND_INFLIGHT.labels(backend_id=str(backend_id)).inc()
         try:
-            yield Reservation(chosen=chosen, ranked=snapshot)
+            yield Reservation(chosen=chosen, ranked=snapshot, affinity=affinity)
         finally:
             with self._lock:
                 remaining = self._inflight[backend_id] - 1

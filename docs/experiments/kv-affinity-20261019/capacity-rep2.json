@@ -1,0 +1,168 @@
+{
+ "started_at": "2026-10-19T07:39:11.044301+00:00",
+ "mode": "direct",
+ "url": "http://127.0.0.1:18211",
+ "model": "qwen-0.5b",
+ "max_tokens": 64,
+ "requests_per_level": 128,
+ "warmup_requests": 3,
+ "prompt": "Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership. Kubernetes controllers reconcile desired and observed state with retries, backoff, readiness gates and ownership.",
+ "method": "closed_loop; unique prefix; client-observed first nonempty content; nearest-rank percentiles",
+ "ignore_eos": true,
+ "levels": [
+  {
+   "summary": {
+    "concurrency": 1,
+    "elapsed_seconds": 184.324,
+    "success": 128,
+    "failed": 0,
+    "http_statuses": {
+     "200": 128
+    },
+    "output_tokens": 8192,
+    "output_tokens_per_second": 44.443,
+    "success_requests_per_second": 0.694,
+    "ttft_p50_ms": 49.584,
+    "ttft_p95_ms": 80.774,
+    "success_e2e_p95_ms": 1810.469
+   }
+  },
+  {
+   "summary": {
+    "concurrency": 2,
+    "elapsed_seconds": 99.259,
+    "success": 128,
+    "failed": 0,
+    "http_statuses": {
+     "200": 128
+    },
+    "output_tokens": 8192,
+    "output_tokens_per_second": 82.531,
+    "success_requests_per_second": 1.29,
+    "ttft_p50_ms": 66.279,
+    "ttft_p95_ms": 116.568,
+    "success_e2e_p95_ms": 1994.587
+   }
+  },
+  {
+   "summary": {
+    "concurrency": 4,
+    "elapsed_seconds": 47.012,
+    "success": 128,
+    "failed": 0,
+    "http_statuses": {
+     "200": 128
+    },
+    "output_tokens": 8192,
+    "output_tokens_per_second": 174.252,
+    "success_requests_per_second": 2.723,
+    "ttft_p50_ms": 82.953,
+    "ttft_p95_ms": 109.044,
+    "success_e2e_p95_ms": 1657.051
+   }
+  },
+  {
+   "summary": {
+    "concurrency": 8,
+    "elapsed_seconds": 30.429,
+    "success": 128,
+    "failed": 0,
+    "http_statuses": {
+     "200": 128
+    },
+    "output_tokens": 8192,
+    "output_tokens_per_second": 269.214,
+    "success_requests_per_second": 4.206,
+    "ttft_p50_ms": 124.139,
+    "ttft_p95_ms": 171.524,
+    "success_e2e_p95_ms": 2035.666
+   }
+  },
+  {
+   "summary": {
+    "concurrency": 12,
+    "elapsed_seconds": 19.964,
+    "success": 128,
+    "failed": 0,
+    "http_statuses": {
+     "200": 128
+    },
+    "output_tokens": 8192,
+    "output_tokens_per_second": 410.348,
+    "success_requests_per_second": 6.412,
+    "ttft_p50_ms": 102.386,
+    "ttft_p95_ms": 206.305,
+    "success_e2e_p95_ms": 2079.438
+   }
+  },
+  {
+   "summary": {
+    "concurrency": 16,
+    "elapsed_seconds": 16.88,
+    "success": 128,
+    "failed": 0,
+    "http_statuses": {
+     "200": 128
+    },
+    "output_tokens": 8192,
+    "output_tokens_per_second": 485.302,
+    "success_requests_per_second": 7.583,
+    "ttft_p50_ms": 123.945,
+    "ttft_p95_ms": 273.776,
+    "success_e2e_p95_ms": 2527.714
+   }
+  },
+  {
+   "summary": {
+    "concurrency": 24,
+    "elapsed_seconds": 13.799,
+    "success": 128,
+    "failed": 0,
+    "http_statuses": {
+     "200": 128
+    },
+    "output_tokens": 8192,
+    "output_tokens_per_second": 593.677,
+    "success_requests_per_second": 9.276,
+    "ttft_p50_ms": 166.308,
+    "ttft_p95_ms": 401.346,
+    "success_e2e_p95_ms": 3094.293
+   }
+  },
+  {
+   "summary": {
+    "concurrency": 32,
+    "elapsed_seconds": 9.984,
+    "success": 128,
+    "failed": 0,
+    "http_statuses": {
+     "200": 128
+    },
+    "output_tokens": 8192,
+    "output_tokens_per_second": 820.515,
+    "success_requests_per_second": 12.821,
+    "ttft_p50_ms": 156.332,
+    "ttft_p95_ms": 481.349,
+    "success_e2e_p95_ms": 2702.232
+   }
+  },
+  {
+   "summary": {
+    "concurrency": 48,
+    "elapsed_seconds": 11.155,
+    "success": 128,
+    "failed": 0,
+    "http_statuses": {
+     "200": 128
+    },
+    "output_tokens": 8192,
+    "output_tokens_per_second": 734.367,
+    "success_requests_per_second": 11.474,
+    "ttft_p50_ms": 375.844,
+    "ttft_p95_ms": 3050.546,
+    "success_e2e_p95_ms": 5670.018
+   }
+  }
+ ],
+ "status": "completed"
+}

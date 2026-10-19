@@ -114,12 +114,13 @@ export type CandidateQuery = {
   policy: string;
 };
 
-export type RoutingPolicy = "weighted_random" | "least_latency" | "least_inflight" | "round_robin" | "session_sticky";
+export type RoutingPolicy = "weighted_random" | "least_latency" | "least_inflight" | "round_robin" | "session_sticky" | "prefix_affinity";
 
 export const ROUTING_POLICIES: readonly RoutingPolicy[] = [
   "weighted_random",
   "least_latency",
   "least_inflight",
+  "prefix_affinity",
 ];
 
 export type RequestStatusValue = "success" | "error" | "timeout" | "rejected";

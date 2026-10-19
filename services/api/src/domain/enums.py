@@ -25,3 +25,4 @@ class RoutingPolicy(StrEnum):
     LEAST_INFLIGHT = "least_inflight"
     ROUND_ROBIN = "round_robin"
     SESSION_STICKY = "session_sticky"
+    PREFIX_AFFINITY = "prefix_affinity"

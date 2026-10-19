@@ -6,6 +6,7 @@ export const POLICY_FACTORS: Record<string, Record<FactorKey, number>> = {
   least_inflight: { health: 1, latency: 0, cost: 0 },
   round_robin: { health: 1, latency: 0, cost: 0 },
   session_sticky: { health: 1, latency: 0.5, cost: 0.5 },
+  prefix_affinity: { health: 1, latency: 0, cost: 0 },
 };
 
 export const LATENCY_BASELINE_MS = 2000;
@@ -31,6 +32,7 @@ export function policyFactors(policy: string): Record<FactorKey, number> | null 
 
 export function policyExpression(policy: string): string {
   if (policy === "least_inflight") return "过滤健康与容量后，选择本进程进行中请求最少的后端；相同数量随机选择";
+  if (policy === "prefix_affinity") return "按提示词前缀哈希做 rendezvous 排序，优先命中同一后端的 KV 前缀缓存；超过有界负载上限时顺延到下一个";
   const factors = POLICY_FACTORS[policy];
   if (factors === undefined) return "未知策略";
   const terms: string[] = ["权重"];

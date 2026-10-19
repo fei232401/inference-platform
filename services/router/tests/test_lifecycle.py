@@ -233,15 +233,19 @@ async def test_unavailable_control_plane_uses_stale_snapshot(environment, monkey
 
 
 @pytest.mark.anyio
-async def test_rejected_key_is_not_served_from_stale_snapshot(environment, monkeypatch):
+@pytest.mark.parametrize("rejection,status", [(401, 401), (403, 502), (404, 502)])
+async def test_rejected_key_is_not_served_from_stale_snapshot(environment, monkeypatch, rejection, status):
     monkeypatch.setattr(main, "get_settings", lambda: settings(control_cache_seconds=0.0001, control_stale_seconds=30))
     await route()
     await asyncio.sleep(.001)
-    environment.control_failure = 401
+    environment.control_failure = rejection
     with pytest.raises(HTTPException) as caught:
         await route()
-    assert caught.value.status_code == 401
+    assert caught.value.status_code == status
     assert len(main.app.state.control_cache) == 0
+    environment.control_failure = "down"
+    with pytest.raises(httpx.ConnectError):
+        await route()
 
 
 @pytest.mark.anyio
@@ -256,3 +260,11 @@ async def test_control_plane_down_without_snapshot_fails(environment):
 def test_invalid_cache_windows(values):
     with pytest.raises(ValidationError):
         Settings(**values)
+
+
+@pytest.mark.anyio
+async def test_prefix_affinity_decision_is_audited(environment):
+    result = await main.route(main.RouteIn(model_name="model", prompt="shared prefix question", policy="prefix_affinity"), "test")
+    admission = result.decision["score_snapshot"]["admission"]
+    assert admission["selection"] == "rendezvous_bounded_load"
+    assert admission["affinity"] == {"preferred_id": 1, "rank": 0, "load_bound": 2}

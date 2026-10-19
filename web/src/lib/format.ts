@@ -17,6 +17,7 @@ const POLICY_LABEL: Record<string, string> = {
   least_inflight: "最少进行中请求",
   round_robin: "轮询",
   session_sticky: "会话粘滞",
+  prefix_affinity: "KV 前缀亲和",
 };
 
 const ENGINE_LABEL: Record<string, string> = {

@@ -23,6 +23,7 @@ class TestPoliciesSet:
             "weighted_random",
             "least_latency",
             "least_inflight",
+            "prefix_affinity",
         }
 
 

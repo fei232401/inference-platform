@@ -1,0 +1,184 @@
+{
+ "started_at": "2026-10-19T08:02:26.860911+00:00",
+ "config": {
+  "backends": [
+   "http://127.0.0.1:18211",
+   "http://127.0.0.1:18212"
+  ],
+  "model": "qwen-0.5b",
+  "policies": [
+   "round_robin",
+   "prefix_affinity"
+  ],
+  "documents": 30,
+  "doc_words": 1000,
+  "requests": 300,
+  "concurrency": 8,
+  "tokens": 16,
+  "prefix_chars": 1024,
+  "load_factor": 2.0,
+  "repetitions": 3,
+  "seed": 20261019,
+  "timeout": 120
+ },
+ "method": "closed loop; uniform random choice among shared documents; unique question suffix; fresh document salt per run so earlier runs cannot warm the cache; policies interleaved; hit rate from vLLM prefix_cache_hits_total / prefix_cache_queries_total deltas",
+ "runs": [
+  {
+   "summary": {
+    "policy": "round_robin",
+    "repetition": 0,
+    "load_factor": null,
+    "elapsed_seconds": 27.14,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.5885,
+    "prefix_cache_hit_tokens": 208384,
+    "prefix_cache_query_tokens": 354067,
+    "ttft_p50_ms": 116.54,
+    "ttft_p95_ms": 196.68,
+    "ttft_mean_ms": 135.33,
+    "requests_per_backend": {
+     "1": 150,
+     "2": 150
+    },
+    "distinct_documents_per_backend": {
+     "1": 30,
+     "2": 30
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1180.2
+   }
+  },
+  {
+   "summary": {
+    "policy": "prefix_affinity",
+    "repetition": 0,
+    "load_factor": 2.0,
+    "elapsed_seconds": 36.78,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.8859,
+    "prefix_cache_hit_tokens": 313664,
+    "prefix_cache_query_tokens": 354067,
+    "ttft_p50_ms": 158.03,
+    "ttft_p95_ms": 216.67,
+    "ttft_mean_ms": 161.96,
+    "requests_per_backend": {
+     "1": 147,
+     "2": 153
+    },
+    "distinct_documents_per_backend": {
+     "1": 14,
+     "2": 16
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1180.2
+   }
+  },
+  {
+   "summary": {
+    "policy": "round_robin",
+    "repetition": 1,
+    "load_factor": null,
+    "elapsed_seconds": 38.19,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.5812,
+    "prefix_cache_hit_tokens": 206576,
+    "prefix_cache_query_tokens": 355436,
+    "ttft_p50_ms": 164.23,
+    "ttft_p95_ms": 228.53,
+    "ttft_mean_ms": 169.87,
+    "requests_per_backend": {
+     "1": 150,
+     "2": 150
+    },
+    "distinct_documents_per_backend": {
+     "1": 30,
+     "2": 30
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1184.8
+   }
+  },
+  {
+   "summary": {
+    "policy": "prefix_affinity",
+    "repetition": 1,
+    "load_factor": 2.0,
+    "elapsed_seconds": 39.84,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.8854,
+    "prefix_cache_hit_tokens": 314960,
+    "prefix_cache_query_tokens": 355736,
+    "ttft_p50_ms": 165.95,
+    "ttft_p95_ms": 256.74,
+    "ttft_mean_ms": 177.55,
+    "requests_per_backend": {
+     "1": 154,
+     "2": 146
+    },
+    "distinct_documents_per_backend": {
+     "1": 14,
+     "2": 16
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1185.8
+   }
+  },
+  {
+   "summary": {
+    "policy": "round_robin",
+    "repetition": 2,
+    "load_factor": null,
+    "elapsed_seconds": 41.01,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.6194,
+    "prefix_cache_hit_tokens": 219216,
+    "prefix_cache_query_tokens": 353891,
+    "ttft_p50_ms": 177.08,
+    "ttft_p95_ms": 254.62,
+    "ttft_mean_ms": 182.7,
+    "requests_per_backend": {
+     "1": 150,
+     "2": 150
+    },
+    "distinct_documents_per_backend": {
+     "1": 30,
+     "2": 30
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1179.6
+   }
+  },
+  {
+   "summary": {
+    "policy": "prefix_affinity",
+    "repetition": 2,
+    "load_factor": 2.0,
+    "elapsed_seconds": 39.38,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.8761,
+    "prefix_cache_hit_tokens": 310032,
+    "prefix_cache_query_tokens": 353891,
+    "ttft_p50_ms": 168.11,
+    "ttft_p95_ms": 233.46,
+    "ttft_mean_ms": 172.04,
+    "requests_per_backend": {
+     "1": 119,
+     "2": 181
+    },
+    "distinct_documents_per_backend": {
+     "1": 12,
+     "2": 18
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1179.6
+   }
+  }
+ ],
+ "status": "completed"
+}

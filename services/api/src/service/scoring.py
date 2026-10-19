@@ -7,6 +7,7 @@ POLICY_FACTORS: dict[str, dict[str, float]] = {
     "least_inflight": {"health": 1.0, "latency": 0.0, "cost": 0.0},
     "round_robin": {"health": 1.0, "latency": 0.0, "cost": 0.0},
     "session_sticky": {"health": 1.0, "latency": 0.5, "cost": 0.5},
+    "prefix_affinity": {"health": 1.0, "latency": 0.0, "cost": 0.0},
 }
 
 HEALTH_FACTOR = {"healthy": 1.0, "unhealthy": 0.0, "unknown": 0.5}

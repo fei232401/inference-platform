@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     backend_max_inflight: int = Field(default=4, ge=1)
     backend_inflight_limits: dict[str, int] = Field(default_factory=dict)
     stream_openai: bool = False
+    affinity_prefix_chars: int = Field(default=1024, ge=1, le=65536)
+    affinity_load_factor: float = Field(default=1.25, ge=1.0, le=10.0, allow_inf_nan=False)
     ttft_model: str = ""
     ttft_window_seconds: int = Field(default=30, ge=1, le=3600)
 

@@ -1,0 +1,263 @@
+{
+ "started_at": "2026-10-19T08:10:11.640490+00:00",
+ "config": {
+  "backends": [
+   "http://127.0.0.1:18211",
+   "http://127.0.0.1:18212"
+  ],
+  "model": "qwen-3b",
+  "policies": [
+   "round_robin",
+   "least_inflight",
+   "prefix_affinity"
+  ],
+  "documents": 30,
+  "doc_words": 1000,
+  "requests": 300,
+  "concurrency": 8,
+  "tokens": 16,
+  "prefix_chars": 1024,
+  "load_factor": 2.0,
+  "repetitions": 3,
+  "seed": 20261019,
+  "timeout": 120
+ },
+ "method": "closed loop; uniform random choice among shared documents; unique question suffix; fresh document salt per run so earlier runs cannot warm the cache; policies interleaved; hit rate from vLLM prefix_cache_hits_total / prefix_cache_queries_total deltas",
+ "runs": [
+  {
+   "summary": {
+    "policy": "round_robin",
+    "repetition": 0,
+    "load_factor": null,
+    "elapsed_seconds": 124.44,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.5876,
+    "prefix_cache_hit_tokens": 208240,
+    "prefix_cache_query_tokens": 354367,
+    "ttft_p50_ms": 416.86,
+    "ttft_p95_ms": 2217.17,
+    "ttft_mean_ms": 647.24,
+    "requests_per_backend": {
+     "1": 150,
+     "2": 150
+    },
+    "distinct_documents_per_backend": {
+     "1": 30,
+     "2": 30
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1181.2
+   }
+  },
+  {
+   "summary": {
+    "policy": "least_inflight",
+    "repetition": 0,
+    "load_factor": null,
+    "elapsed_seconds": 135.38,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.577,
+    "prefix_cache_hit_tokens": 204640,
+    "prefix_cache_query_tokens": 354667,
+    "ttft_p50_ms": 473.7,
+    "ttft_p95_ms": 1667.52,
+    "ttft_mean_ms": 643.07,
+    "requests_per_backend": {
+     "1": 152,
+     "2": 148
+    },
+    "distinct_documents_per_backend": {
+     "1": 30,
+     "2": 30
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1182.2
+   }
+  },
+  {
+   "summary": {
+    "policy": "prefix_affinity",
+    "repetition": 0,
+    "load_factor": 2.0,
+    "elapsed_seconds": 90.74,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.886,
+    "prefix_cache_hit_tokens": 313984,
+    "prefix_cache_query_tokens": 354367,
+    "ttft_p50_ms": 308.26,
+    "ttft_p95_ms": 1017.39,
+    "ttft_mean_ms": 398.17,
+    "requests_per_backend": {
+     "1": 140,
+     "2": 160
+    },
+    "distinct_documents_per_backend": {
+     "1": 14,
+     "2": 16
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1181.2
+   }
+  },
+  {
+   "summary": {
+    "policy": "round_robin",
+    "repetition": 1,
+    "load_factor": null,
+    "elapsed_seconds": 137.52,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.5799,
+    "prefix_cache_hit_tokens": 206304,
+    "prefix_cache_query_tokens": 355736,
+    "ttft_p50_ms": 559.01,
+    "ttft_p95_ms": 1440.81,
+    "ttft_mean_ms": 662.7,
+    "requests_per_backend": {
+     "1": 150,
+     "2": 150
+    },
+    "distinct_documents_per_backend": {
+     "1": 30,
+     "2": 30
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1185.8
+   }
+  },
+  {
+   "summary": {
+    "policy": "least_inflight",
+    "repetition": 1,
+    "load_factor": null,
+    "elapsed_seconds": 135.8,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.5558,
+    "prefix_cache_hit_tokens": 197872,
+    "prefix_cache_query_tokens": 356036,
+    "ttft_p50_ms": 546.51,
+    "ttft_p95_ms": 1412.18,
+    "ttft_mean_ms": 643.47,
+    "requests_per_backend": {
+     "1": 152,
+     "2": 148
+    },
+    "distinct_documents_per_backend": {
+     "1": 30,
+     "2": 30
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1186.8
+   }
+  },
+  {
+   "summary": {
+    "policy": "prefix_affinity",
+    "repetition": 1,
+    "load_factor": 2.0,
+    "elapsed_seconds": 98.62,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.8199,
+    "prefix_cache_hit_tokens": 291184,
+    "prefix_cache_query_tokens": 355136,
+    "ttft_p50_ms": 343.49,
+    "ttft_p95_ms": 972.74,
+    "ttft_mean_ms": 415.37,
+    "requests_per_backend": {
+     "1": 218,
+     "2": 82
+    },
+    "distinct_documents_per_backend": {
+     "1": 21,
+     "2": 9
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1183.8
+   }
+  },
+  {
+   "summary": {
+    "policy": "round_robin",
+    "repetition": 2,
+    "load_factor": null,
+    "elapsed_seconds": 133.32,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.6186,
+    "prefix_cache_hit_tokens": 219280,
+    "prefix_cache_query_tokens": 354491,
+    "ttft_p50_ms": 452.86,
+    "ttft_p95_ms": 1521.14,
+    "ttft_mean_ms": 603.58,
+    "requests_per_backend": {
+     "1": 150,
+     "2": 150
+    },
+    "distinct_documents_per_backend": {
+     "1": 30,
+     "2": 30
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1181.6
+   }
+  },
+  {
+   "summary": {
+    "policy": "least_inflight",
+    "repetition": 2,
+    "load_factor": null,
+    "elapsed_seconds": 134.51,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.5945,
+    "prefix_cache_hit_tokens": 210560,
+    "prefix_cache_query_tokens": 354191,
+    "ttft_p50_ms": 498.04,
+    "ttft_p95_ms": 1463.89,
+    "ttft_mean_ms": 612.93,
+    "requests_per_backend": {
+     "1": 152,
+     "2": 148
+    },
+    "distinct_documents_per_backend": {
+     "1": 29,
+     "2": 30
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1180.6
+   }
+  },
+  {
+   "summary": {
+    "policy": "prefix_affinity",
+    "repetition": 2,
+    "load_factor": 2.0,
+    "elapsed_seconds": 87.79,
+    "success": 300,
+    "failed": 0,
+    "prefix_cache_hit_rate": 0.8851,
+    "prefix_cache_hit_tokens": 313744,
+    "prefix_cache_query_tokens": 354491,
+    "ttft_p50_ms": 317.08,
+    "ttft_p95_ms": 887.22,
+    "ttft_mean_ms": 407.33,
+    "requests_per_backend": {
+     "1": 165,
+     "2": 135
+    },
+    "distinct_documents_per_backend": {
+     "1": 17,
+     "2": 13
+    },
+    "preemptions": 0,
+    "mean_prompt_tokens": 1181.6
+   }
+  }
+ ],
+ "status": "completed"
+}

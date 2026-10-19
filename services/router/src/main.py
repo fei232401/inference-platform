@@ -19,6 +19,7 @@ from .admission import AdmissionController, AdmissionRejected
 from .config import get_settings
 from .control_cache import ControlCache, ControlPlaneUnavailable
 from .metrics import ADMISSION_REJECTIONS, CONTROL_LOOKUPS, UPSTREAM_TTFT, observe_record_failure, observe_route, observe_upstream_error
+from .affinity import affinity_key
 from .picking import POLICIES, normalize
 from .ttft import TTFTWindow
 
@@ -112,10 +113,9 @@ async def _cached_control(kind: str, key: tuple, loader, settings) -> tuple[Any,
         try:
             return await _control_call(loader(), settings.control_timeout_seconds)
         except HTTPException as exc:
-            if exc.status_code == 401:
-                cache.evict(lambda cached: cached[1] == key[0])
             if _control_unavailable(exc):
                 raise ControlPlaneUnavailable(exc) from exc
+            cache.evict(lambda cached: cached[1] == key[0])
             raise
         except httpx.RequestError as exc:
             raise ControlPlaneUnavailable(exc) from exc
@@ -367,6 +367,7 @@ async def route(
     clock = time.perf_counter()
 
     backend = None
+    affinity = None
     output = ""
     prompt_tokens = completion_tokens = None
     error_code = None
@@ -380,9 +381,12 @@ async def route(
                 )
                 with app.state.admission.reserve(
                     candidates, policy, settings.backend_max_inflight, settings.backend_inflight_limits,
+                    affinity_key(payload.prompt, settings.affinity_prefix_chars) if policy == "prefix_affinity" else None,
+                    settings.affinity_load_factor,
                 ) as reservation:
                     chosen = reservation.chosen
                     candidates = reservation.ranked
+                    affinity = reservation.affinity
                     backend, control_sources["backend"] = await _cached_control(
                         "backend", (key_digest, int(chosen["backend_id"])),
                         lambda: _fetch_backend(client, base, headers, int(chosen["backend_id"])), settings,
@@ -441,7 +445,8 @@ async def route(
                 "ranked": candidates,
                 "admission": {
                     "scope": "router_process",
-                    "selection": "least_inflight_random_tie" if policy == "least_inflight" else policy,
+                    "selection": {"least_inflight": "least_inflight_random_tie", "prefix_affinity": "rendezvous_bounded_load"}.get(policy, policy),
+                    "affinity": affinity,
                     "selected_inflight_before": chosen["inflight"],
                     "selected_limit": chosen["max_inflight"],
                 },

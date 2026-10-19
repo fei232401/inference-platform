@@ -3,7 +3,8 @@ from __future__ import annotations
 import random
 from typing import Any
 
-POLICIES = frozenset({"weighted_random", "least_latency", "least_inflight"})
+POLICIES = frozenset({"weighted_random", "least_latency", "least_inflight", "prefix_affinity"})
+RESERVATION_POLICIES = frozenset({"least_inflight", "prefix_affinity"})
 
 
 def normalize(url: str) -> str:
@@ -13,8 +14,8 @@ def normalize(url: str) -> str:
 def pick(ranked: list[dict[str, Any]], policy: str) -> dict[str, Any] | None:
     if policy not in POLICIES:
         raise ValueError("unsupported routing policy")
-    if policy == "least_inflight":
-        raise ValueError("least_inflight requires an atomic admission reservation")
+    if policy in RESERVATION_POLICIES:
+        raise ValueError(f"{policy} requires an atomic admission reservation")
     eligible = [item for item in ranked if not item.get("excluded")]
     if not eligible:
         return None
