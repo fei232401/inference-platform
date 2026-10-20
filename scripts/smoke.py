@@ -61,6 +61,15 @@ def expect(response, code, name):
     return response.json()
 
 
+def expect_within(send, code, name, seconds):
+    deadline = time.monotonic() + seconds
+    while True:
+        response = send()
+        if response.status_code == code or time.monotonic() >= deadline:
+            return expect(response, code, name)
+        time.sleep(0.2)
+
+
 async def schema_version(value):
     connection = await asyncpg.connect(environment["DATABASE_DSN"].replace("postgresql+asyncpg://", "postgresql://"))
     try:
@@ -116,10 +125,11 @@ def main():
         missing = dict(payload, model_name="missing-" + suffix)
         expect(client.post(router + "/v1/route", json=missing), 503, "no_candidates")
         expect(client.post(api + f'/api/v1/backends/{b["id"]}/state', json={"state": "disabled"}), 200, "disable_backend")
-        expect(client.post(router + "/v1/route", json=payload), 503, "disabled_backend_not_routed")
+        settle = float(environment.get("CONTROL_CACHE_SECONDS", "2")) + 1
+        expect_within(lambda: client.post(router + "/v1/route", json=payload), 503, "disabled_backend_not_routed", settle)
         expect(client.post(api + f'/api/v1/backends/{b["id"]}/state', json={"state": "active"}), 200, "restore_backend")
         if "ENGINE_URL" not in environment:
-            expect(client.post(router + "/v1/route", json=dict(payload, prompt="__fail__")), 502, "upstream_failure")
+            expect_within(lambda: client.post(router + "/v1/route", json=dict(payload, prompt="__fail__")), 502, "upstream_failure", settle)
         if "ENGINE_URL" not in environment:
             with tempfile.TemporaryDirectory(prefix="health-check-") as folder:
                 monitor = Monitor(api, token, folder)
@@ -128,12 +138,12 @@ def main():
                 marker.write_text("fail")
                 for _ in range(3):
                     monitor.cycle()
-                expect(client.post(router + "/v1/route", json=payload), 503, "probe_failure_excludes_backend")
+                expect_within(lambda: client.post(router + "/v1/route", json=payload), 503, "probe_failure_excludes_backend", settle)
                 marker.write_text("ok")
                 monitor.cycle()
                 expect(client.post(router + "/v1/route", json=payload), 503, "single_success_does_not_reenable")
                 monitor.cycle()
-                expect(client.post(router + "/v1/route", json=payload), 200, "probe_recovery_restores_routing")
+                expect_within(lambda: client.post(router + "/v1/route", json=payload), 200, "probe_recovery_restores_routing", settle)
                 events = [json.loads(line) for line in (Path(folder) / "probe-events.jsonl").read_text().splitlines()]
                 backend_events = [event for event in events if event["backend_id"] == b["id"]]
                 assert [event["healthy"] for event in backend_events] == [True, False, True]
