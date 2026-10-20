@@ -93,6 +93,27 @@ services:
       test: [CMD, python, -c, "from pathlib import Path; import time; assert time.time() - float(Path('/state/heartbeat').read_text()) < 60"]
       interval: 10s
       retries: 6
+  discovery:
+    profiles: [k8s]
+    image: ${IMAGE_PREFIX:-inference-platform}/router:${IMAGE_TAG:-local}
+    command: [python, -m, ops.discovery]
+    environment:
+      CONTROL_PLANE_URL: http://api:8000
+      ADMIN_KEY_FILE: /run/secrets/admin-key
+      DISCOVERY_STATE_DIR: /state
+      KUBE_API: ${KUBE_API:-https://kubernetes.default.svc}
+      DISCOVERY_NAMESPACE: ${DISCOVERY_NAMESPACE:-default}
+      DISCOVERY_SERVICE: ${DISCOVERY_SERVICE:-replace-with-inference-service}
+      DISCOVERY_MODEL: ${DISCOVERY_MODEL:-replace-with-logical-model}
+      DISCOVERY_PORT_NAME: ${DISCOVERY_PORT_NAME:-}
+      DISCOVERY_RETIRE_SECONDS: ${DISCOVERY_RETIRE_SECONDS:-30}
+    volumes:
+      - ./.state/admin-key:/run/secrets/admin-key:ro
+      - ./.state/discovery:/state
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
   init:
     profiles: [tools]
     image: ${IMAGE_PREFIX:-inference-platform}/api:${IMAGE_TAG:-local}
