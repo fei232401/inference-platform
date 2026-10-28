@@ -84,10 +84,12 @@ Router 目前支持的策略：`weighted_random`、`least_latency`、`least_infl
 
 `ops/discovery.py` 可从 Kubernetes `EndpointSlice` 自动同步推理后端，默认每 5 秒轮询一次：
 
-- `ready=true` 的 endpoint 登记或更新到控制面；`terminating=true` 或不再 ready 的 endpoint 先进入排空，不再接新请求。
+- `ready=true` 的 endpoint 登记或更新到控制面；`terminating=true` 或不再 ready 的 endpoint 标记为 `draining`，从新获取的候选列表中剔除；它不是停止准入并等待在途归零的排空握手，已有候选快照和在途请求仍可能访问旧实例。
 - endpoint 消失后保留一个 grace period，超时才标记为 `disabled`，避免滚动更新期间短暂抖动直接删除后端记录。
-- 同步以 endpoint 地址和目标端口生成稳定身份，重复轮询是幂等的；它只维护后端登记状态，不部署模型，也不替代 Kubernetes 控制器。
+- 同步以 `k8s:命名空间/Service/Pod名` 为目录身份，endpoint 地址和目标端口组成访问 URL；同名 Pod 换 IP 时更新 URL。当前不按 Pod UID 区分同名重建，重复轮询是幂等的；它只维护后端登记状态，不部署模型，也不替代 Kubernetes 控制器。
 - Router 的控制面缓存默认 2 秒，因此登记或禁用后的请求侧生效还可能再延迟最多约 2 秒。
+
+控制面不可用时还可能使用最长 30 秒的旧快照，因此不能把 2 秒理解为任何故障下的剔除上限。当前缩容接受请求失败，不承诺无损下线。发现组件属于可选 `k8s` profile，默认 Compose 不启动它；真实接入还需配置 Kube API 可达性、鉴权和证书。
 
 Kind 单节点验证使用 busybox 推理占位负载，且没有 readiness probe。实测初始登记 4.5 秒、扩容登记 6.1 秒、缩容候选剔除 30.5 秒、完整下线 46.8 秒、Pod 重建登记 2.1 秒。原始结果见 `artifacts/discovery-validation.json`。这些数字验证轮询、排空和重建路径，不代表生产集群 SLA；当前实现也是轮询器，不是基于 watch 的生产级控制器。
 
@@ -153,6 +155,8 @@ Kind 单节点验证使用 busybox 推理占位负载，且没有 readiness prob
 | 根目录运维与服务发现 | 17（运维 7 + 服务发现 10） | 仓库根目录 `python -m unittest discover -s tests` |
 
 合计 194 项。这些是单元和模块测试，不是浏览器冒烟或端到端压测。`scripts/check.py` 是串行跑全部检查的总入口；本轮同时验证了 Web 生产构建成功。
+
+2026-10-20 收口重跑分两阶段：初次受限会话只完成 130 项，数据库连接被 socket 禁令阻塞。切换 full access 后，使用隔离源码/状态目录和新建专用 PostgreSQL 容器，**API87 + Router70 + 运维/发现17 + Web20 = 194 项全部通过，无跳过**，Web 生产构建成功；mock 冒烟 22 项检查和 1 个 Playwright 浏览器用例通过。日常 Router 到真实 vLLM 的一次小请求返回“你好”，审计立即回读成功。未重做 GPU 性能对照或 Kind 服务发现计时，不将单请求当成压测。临时测试数据库已删除，日常 Key/数据库未被测试重建。证据见 `docs/evidence/closure-20261020/` 的 full-* 日志、JUnit 和 daily-real-vllm.json；早先 blocked 日志保留作环境切换溯源。
 
 ## 快速开始（Docker Compose）
 

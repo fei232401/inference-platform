@@ -1,0 +1,34 @@
+{
+  "status": "passed_declared_functional_scope",
+  "baseline_commit": "ad7e5f3",
+  "business_source_changed": false,
+  "router": {"status": "passed", "tests": 70, "failures": 0, "skipped": 0, "report": "router.xml"},
+  "api_without_real_database": {"status": "passed", "tests": 23, "failures": 0, "skipped": 0, "report": "api-unit.xml"},
+  "ops_and_discovery": {"status": "passed", "tests": 17, "log": "ops.log"},
+  "web": {"status": "passed", "tests": 20, "log": "web-test.log"},
+  "web_build": {"status": "passed", "log": "web-build.log"},
+  "passed_module_tests_total": 130,
+  "initial_api_full_suite_attempt": {
+    "status": "environment_blocked_before_full_access",
+    "log": "api-db-blocked.log"
+  },
+  "full_suite_after_full_access": {
+    "status": "passed",
+    "api": 87,
+    "router": 70,
+    "ops_and_discovery": 17,
+    "web": 20,
+    "total": 194,
+    "skipped": 0,
+    "web_build": "passed",
+    "log": "full-check.log",
+    "api_report": "full-api-tests.xml",
+    "router_report": "full-router-tests.xml"
+  },
+  "browser_and_mock_smoke": {"status": "passed", "checks": 22, "playwright_tests": 1, "report": "full-mock_openai-smoke.json", "log": "full-smoke.log"},
+  "daily_real_vllm": {"status": "passed", "requests": 1, "audit_immediately_readable": true, "report": "daily-real-vllm.json"},
+  "isolation": {"new_database_container_removed": true, "test_key_and_database_separate_from_daily_demo": true, "report": "full-platform-run.json"},
+  "not_retested": ["GPU performance experiment", "Kind discovery timing", "multi-router or lossless draining"],
+  "full_acceptance": true,
+  "acceptance_scope": "existing single-router functional modules and browser/mock flow plus one real-vLLM request; not production readiness or performance"
+}

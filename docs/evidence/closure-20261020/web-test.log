@@ -1,0 +1,15 @@
+
+> ai-infra-platform-web@0.1.0 test
+> vitest run src --environment jsdom
+
+
+ RUN  v2.1.9 /home/user/projects/inference-platform/web
+
+ ✓ src/api/apiKey.test.ts (9 tests) 12ms
+ ✓ src/api/client.test.ts (11 tests) 9ms
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  21:44:26
+   Duration  1.53s (transform 236ms, setup 0ms, collect 234ms, tests 21ms, environment 1.89s, prepare 257ms)
+

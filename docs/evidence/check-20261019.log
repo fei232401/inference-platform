@@ -29,7 +29,7 @@ OK
 > vitest run src --environment jsdom
 
 
- RUN  v2.1.9 /home/fei/projects/inference-platform/web
+ RUN  v2.1.9 /home/user/projects/inference-platform/web
 
  ✓ src/api/apiKey.test.ts (9 tests) 5ms
  ✓ src/api/client.test.ts (11 tests) 9ms

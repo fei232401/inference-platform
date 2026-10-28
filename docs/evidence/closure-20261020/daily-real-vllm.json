@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "request_id": "afdffb85-d04f-44e0-ad7f-714673b08ebc",
+  "output": "你好",
+  "recorded": true,
+  "audit_immediately_readable": true,
+  "timings": {
+    "total_ms": 2668.42,
+    "audit_ms": 72.27,
+    "response_ms": 2743.13,
+    "engine_model": "/models/qwen2.5-3b-awq"
+  },
+  "scope": "existing daily Router to real vLLM, one small functional request; not performance or GPU handoff verification"
+}

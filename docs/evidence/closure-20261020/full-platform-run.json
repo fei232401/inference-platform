@@ -1,0 +1,14 @@
+{
+  "workspace": "/tmp/fei-closure-platform-0m79q3tt",
+  "container": "fei-closure-db-f1cb46cd",
+  "status": "passed",
+  "full-check": {
+    "exit_code": 0
+  },
+  "full-smoke": {
+    "exit_code": 0
+  },
+  "database_cleanup_exit": 0,
+  "test_key_isolated_from_daily_state": true,
+  "workspace_removed_after_evidence_copy": true
+}

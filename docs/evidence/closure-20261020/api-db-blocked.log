@@ -1,0 +1,193 @@
+E
+==================================== ERRORS ====================================
+__ ERROR at setup of test_custom_app_auth_cannot_fall_back_to_global_settings __
+
+settings = Settings(app_name='ai-infra-platform-api', app_env='test', app_version='0.1.0', log_level='INFO', server_host='127.0.0... auth_required=False, default_page_size=50, max_page_size=200, backend_health_ttl_seconds=0, expected_schema_version=1)
+
+    @pytest_asyncio.fixture(scope="session")
+    async def database(settings: Settings) -> AsyncIterator[Database]:
+        if os.getenv("SKIP_DB_TESTS") == "1":
+            pytest.skip("SKIP_DB_TESTS=1，跳过数据库集成测试")
+        if not MIGRATION_FILE.exists():
+            pytest.fail(f"未找到迁移文件: {MIGRATION_FILE}")
+    
+        from sqlalchemy.engine import make_url
+    
+        if not (make_url(settings.database_dsn).database or "").endswith("_test"):
+            pytest.fail("集成测试只能使用名称以 _test 结尾的专用数据库")
+        instance = Database(settings)
+        try:
+>           await instance.ping()
+
+tests/conftest.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/repository/session.py:65: in ping
+    async with self._engine.connect() as connection:
+               ^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/ext/asyncio/base.py:121: in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/ext/asyncio/engine.py:275: in start
+    await greenlet_spawn(self.sync_engine.connect)
+../../.venv/lib/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:3295: in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:144: in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:3319: in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py:448: in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py:1290: in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py:712: in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/pool/impl.py:178: in _do_get
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+../../.venv/lib/python3.14/site-packages/sqlalchemy/pool/impl.py:176: in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py:389: in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py:674: in __init__
+    self.__connect()
+../../.venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py:900: in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+../../.venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py:896: in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/engine/create.py:667: in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:630: in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:955: in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/asyncpg/connection.py:2443: in connect
+    return await connect_utils._connect(
+../../.venv/lib/python3.14/site-packages/asyncpg/connect_utils.py:1249: in _connect
+    raise last_error or exceptions.TargetServerAttributeNotMatched(
+../../.venv/lib/python3.14/site-packages/asyncpg/connect_utils.py:1218: in _connect
+    conn = await _connect_addr(
+../../.venv/lib/python3.14/site-packages/asyncpg/connect_utils.py:1054: in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/asyncpg/connect_utils.py:1099: in __connect_addr
+    tr, pr = await connector
+             ^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/asyncpg/connect_utils.py:969: in _create_ssl_connection
+    tr, pr = await loop.create_connection(
+/home/user/miniconda3/lib/python3.14/asyncio/base_events.py:1168: in create_connection
+    raise exceptions[0]
+/home/user/miniconda3/lib/python3.14/asyncio/base_events.py:1143: in create_connection
+    sock = await self._connect_sock(
+/home/user/miniconda3/lib/python3.14/asyncio/base_events.py:1020: in _connect_sock
+    sock = socket.socket(family=family, type=type_, proto=proto)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <socket.socket fd=-1, family=0, type=0, proto=0>
+family = <AddressFamily.AF_INET: 2>, type = <SocketKind.SOCK_STREAM: 1>
+proto = 6, fileno = None
+
+    def __init__(self, family=-1, type=-1, proto=-1, fileno=None):
+        # For user code address family and type values are IntEnum members, but
+        # for the underlying _socket.socket they're just integers. The
+        # constructor of _socket.socket converts the given argument to an
+        # integer automatically.
+        if fileno is None:
+            if family == -1:
+                family = AF_INET
+            if type == -1:
+                type = SOCK_STREAM
+            if proto == -1:
+                proto = 0
+>       _socket.socket.__init__(self, family, type, proto, fileno)
+E       PermissionError: [Errno 1] Operation not permitted
+
+/home/user/miniconda3/lib/python3.14/socket.py:236: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+self = <Coroutine test_custom_app_auth_cannot_fall_back_to_global_settings>
+
+    def setup(self) -> None:
+        runner_fixture_id = f"_{self._loop_scope}_scoped_runner"
+        if runner_fixture_id not in self.fixturenames:
+            self.fixturenames.append(runner_fixture_id)
+        # When loop factories are configured, resolve the loop factory
+        # fixture early so that a factory variant change cascades cache
+        # invalidation before any async fixture checks its cache.
+        hook_caller = self.config.hook.pytest_asyncio_loop_factories
+        if hook_caller.get_hookimpls():
+            _ = self._request.getfixturevalue(_asyncio_loop_factory.__name__)
+>       return super().setup()
+               ^^^^^^^^^^^^^^^
+
+../../.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:944: in pytest_fixture_setup
+    hook_result = yield
+                  ^^^^^
+../../.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:407: in _asyncgen_fixture_wrapper
+    result = runner.run(setup(), context=context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/user/miniconda3/lib/python3.14/asyncio/runners.py:128: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/user/miniconda3/lib/python3.14/asyncio/base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+../../.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:403: in setup
+    res = await gen_obj.__anext__()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+settings = Settings(app_name='ai-infra-platform-api', app_env='test', app_version='0.1.0', log_level='INFO', server_host='127.0.0... auth_required=False, default_page_size=50, max_page_size=200, backend_health_ttl_seconds=0, expected_schema_version=1)
+
+    @pytest_asyncio.fixture(scope="session")
+    async def database(settings: Settings) -> AsyncIterator[Database]:
+        if os.getenv("SKIP_DB_TESTS") == "1":
+            pytest.skip("SKIP_DB_TESTS=1，跳过数据库集成测试")
+        if not MIGRATION_FILE.exists():
+            pytest.fail(f"未找到迁移文件: {MIGRATION_FILE}")
+    
+        from sqlalchemy.engine import make_url
+    
+        if not (make_url(settings.database_dsn).database or "").endswith("_test"):
+            pytest.fail("集成测试只能使用名称以 _test 结尾的专用数据库")
+        instance = Database(settings)
+        try:
+            await instance.ping()
+        except Exception as exc:
+            await instance.dispose()
+>           pytest.fail(f"PostgreSQL 不可达: {type(exc).__name__}")
+E           Failed: PostgreSQL 不可达: PermissionError
+
+tests/conftest.py:69: Failed
+=========================== short test summary info ============================
+ERROR tests/test_app_settings.py::test_custom_app_auth_cannot_fall_back_to_global_settings
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!

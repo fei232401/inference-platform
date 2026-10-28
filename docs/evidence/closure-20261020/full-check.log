@@ -1,0 +1,54 @@
+........................................................................ [ 82%]
+...............                                                          [100%]
+......................................................................   [100%]
+70 passed in 0.57s
+test_full_cycle_against_fake_cluster_and_control_plane (test_discovery.CycleTests.test_full_cycle_against_fake_cluster_and_control_plane) ... ok
+test_reads_ready_and_terminating_endpoints (test_discovery.EndpointTests.test_reads_ready_and_terminating_endpoints) ... ok
+test_ready_copy_wins_across_slices (test_discovery.EndpointTests.test_ready_copy_wins_across_slices) ... ok
+test_terminating_endpoint_is_never_ready (test_discovery.EndpointTests.test_terminating_endpoint_is_never_ready) ... ok
+test_absence_clock_starts_once_and_clears_on_disable (test_discovery.PlanTests.test_absence_clock_starts_once_and_clears_on_disable) ... ok
+test_new_ready_pod_is_registered (test_discovery.PlanTests.test_new_ready_pod_is_registered) ... ok
+test_returning_pod_is_reactivated_with_new_address (test_discovery.PlanTests.test_returning_pod_is_reactivated_with_new_address) ... ok
+test_starting_pod_is_not_registered (test_discovery.PlanTests.test_starting_pod_is_not_registered) ... ok
+test_terminating_pod_is_drained_immediately_then_disabled_after_grace (test_discovery.PlanTests.test_terminating_pod_is_drained_immediately_then_disabled_after_grace) ... ok
+test_unmanaged_backends_are_never_touched (test_discovery.PlanTests.test_unmanaged_backends_are_never_touched) ... ok
+test_failure_streak_is_reset_by_success (test_operations.HealthTests.test_failure_streak_is_reset_by_success) ... ok
+test_failures_are_debounced_and_recovery_requires_two_successes (test_operations.HealthTests.test_failures_are_debounced_and_recovery_requires_two_successes) ... ok
+test_commit_written_before_crash_is_not_rolled_back (test_operations.ReleaseTests.test_commit_written_before_crash_is_not_rolled_back) ... ok
+test_concurrent_release_is_rejected (test_operations.ReleaseTests.test_concurrent_release_is_rejected) ... ok
+test_failed_recovery_retains_journal (test_operations.ReleaseTests.test_failed_recovery_retains_journal) ... ok
+test_first_release_requires_manual_recovery (test_operations.ReleaseTests.test_first_release_requires_manual_recovery) ... ok
+test_interrupted_release_restores_last_known_good (test_operations.ReleaseTests.test_interrupted_release_restores_last_known_good) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.027s
+
+OK
+
+> ai-infra-platform-web@0.1.0 test
+> vitest run src --environment jsdom
+
+
+ RUN  v2.1.9 /tmp/fei-closure-platform-0m79q3tt/source/web
+
+ ✓ src/api/apiKey.test.ts (9 tests) 12ms
+ ✓ src/api/client.test.ts (11 tests) 30ms
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  22:19:45
+   Duration  2.24s (transform 176ms, setup 0ms, collect 153ms, tests 42ms, environment 3.03s, prepare 432ms)
+
+
+> ai-infra-platform-web@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 1628 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.45 kB │ gzip:  0.30 kB
+dist/assets/index-C4-bpbKE.css   13.12 kB │ gzip:  2.86 kB
+dist/assets/index-CjO-2v1T.js   249.06 kB │ gzip: 77.88 kB │ map: 987.41 kB
+✓ built in 2.13s

@@ -1,0 +1,10 @@
+Schema initialized; local admin key saved in .state/admin-key
+
+Running 1 test using 1 worker
+
+(node:866149) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/inference.spec.ts:4:1 › browser generates through router and persists decision (1.3s)
+
+  1 passed (4.2s)
+{"engine": "mock_openai", "checks": ["missing_key", "forged_key", "register_model", "register_backend", "generate_and_record", "read_persisted_request", "output_and_database_match", "no_candidates", "disable_backend", "disabled_backend_not_routed", "restore_backend", "upstream_failure", "probe_failure_excludes_backend", "single_success_does_not_reenable", "probe_recovery_restores_routing", "health_events_deduplicated", "create_scoped_key", "revoke_key", "revoked_key_rejected", "schema_mismatch_api", "schema_mismatch_router", "browser_inference_and_persistence"], "request_id": "067cde9e-b54a-4ced-8944-f2805c7ad475", "output": "推理链路验证成功", "total_ms": 41.72}
